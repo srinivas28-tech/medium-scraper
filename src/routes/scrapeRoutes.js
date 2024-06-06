@@ -1,7 +1,11 @@
 const express = require('express');
 const { scrapeMedium } = require('../controllers/scrapeController');
-
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const router = express.Router();
+
+router.use(bodyParser.json());
+router.use(cors());
 
 let articlesCache = [];
 
