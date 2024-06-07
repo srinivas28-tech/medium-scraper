@@ -8,7 +8,7 @@ async function scrapeMedium(topic) {
         browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            executablePath: puppeteer.executablePath() // Explicitly set the executable path
+            executablePath: process.env.CHROME_BIN || null // Ensure Puppeteer uses the correct path
         });
         const page = await browser.newPage();
         await page.goto(`https://medium.com/search?q=${topic}`, { waitUntil: 'networkidle2' });
