@@ -5,23 +5,27 @@ async function scrapeMedium(topic) {
 
     let browser;
     try {
-        const browser = await puppeteer.launch();
+        browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: puppeteer.executablePath() // Explicitly set the executable path
+        });
         const page = await browser.newPage();
-        await page.goto(`https://medium.com/search?q=${topic}`);
+        await page.goto(`https://medium.com/search?q=${topic}`, { waitUntil: 'networkidle2' });
+
         const articles = await page.evaluate(() => {
             const articleElements = document.querySelectorAll('article');
-            const arrayOfArticles= Array.from(articleElements).map(article =>({
+            const arrayOfArticles = Array.from(articleElements).map(article => ({
                 title: article.querySelector('h2') ? article.querySelector('h2').innerText : '',
                 author: article.querySelector('p') ? article.querySelector('p').innerText : '',
                 link: article.querySelector('div[role="link"]') ? article.querySelector('div[role="link"]').getAttribute('data-href') : '',
-                publish_date: article.querySelector('span')? article.querySelector('span').innerText:'',
+                publish_date: article.querySelector('span') ? article.querySelector('span').innerText : '',
             }));
-            return arrayOfArticles.splice(0,5);
+            return arrayOfArticles.slice(0, 5);
         });
 
         await browser.close();
         return articles;
-
     } catch (error) {
         if (browser) {
             await browser.close();
